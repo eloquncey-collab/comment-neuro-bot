@@ -4,16 +4,23 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 venv/
+env/
 ENV/
-.venv
+*.egg-info/
+dist/
+build/
 
-# Проект (Секреты и данные)
+# Переменные окружения и секреты (ОЧЕНЬ ВАЖНО!)
 .env
+
+# База данных SQLite (чтобы не гнать мусор, на сервере она создастся заново)
 *.db
+*.sqlite
+*.sqlite3
+
+# Файлы сессий Telethon (на всякий случай)
 *.session
-sessions/
 
 # IDE
 .vscode/

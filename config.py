@@ -1,12 +1,15 @@
-import os
+from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-ADMIN_ID = int(os.getenv("ADMIN_ID"))
+class Settings(BaseSettings):
+    BOT_TOKEN: str = os.getenv("BOT_TOKEN")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    ADMIN_ID: int = int(os.getenv("ADMIN_ID", 0))
+    
+    # Настройки БД
+    DB_URL: str = "sqlite+aiosqlite:///./bot_database.db"
 
-# Настройки задержек и рандома
-MIN_DELAY = 10  # секунд
-MAX_DELAY = 30  # секунд
+settings = Settings()

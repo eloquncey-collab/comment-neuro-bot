@@ -1,30 +1,32 @@
 import openai
-import config
+from config import settings
+import logging
 
-openai.api_key = config.OPENAI_API_KEY
+openai.api_key = settings.OPENAI_API_KEY
 
-async def generate_comment(post_text, prompt_type):
-    """
-    Генерирует комментарий на основе текста поста и типа промпта.
-    """
+async def generate_comment(post_text: str, prompt_type: str, custom_prompt: str = None) -> str:
     try:
-        # Формируем системный промпт
-        system_prompt = f"Ты опытный комментатор Telegram. Твоя задача: {prompt_type}. Не используй эмодзи, если это не требуется. пиши на русском языке."
-        
-        # Ограничиваем длину контекста, чтобы сэкономить токены
-        context = post_text[:1000] if post_text else "Без текста"
+        system_prompts = {
+            "short": "Напиши короткий (до 15 слов) осмысленный комментарий к посту.",
+            "long": "Напиши развернутый и полезный комментарий к посту (3-5 предложений).",
+            "friendly": "Напиши очень дружелюбный и позитивный комментарий.",
+            "provocative": "Напиши провокационный комментарий, который вызовет дискуссию.",
+            "intimate": "Напиши немного флиртующий и игривый комментарий."
+        }
 
-        response = await openai.ChatCompletion.acreate(
-            model="gpt-3.5-turbo",
+        sys_instruction = system_prompts.get(prompt_type, system_prompts["short"])
+        if custom_prompt:
+            sys_instruction = custom_prompt
+
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo", # Или gpt-4
             messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Пост: {context}\n\nНапиши комментарий:"}
+                {"role": "system", "content": sys_instruction},
+                {"role": "user", "content": f"Текст поста: {post_text}"}
             ],
-            max_tokens=100,
-            temperature=0.7
+            max_tokens=150
         )
-        
         return response.choices[0].message.content.strip()
     except Exception as e:
-        print(f"OpenAI Error: {e}")
+        logging.error(f"OpenAI Error: {e}")
         return "Интересный пост!"
